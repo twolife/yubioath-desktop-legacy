@@ -297,7 +297,7 @@ ApplicationWindow {
     Shortcut {
         id: shortcutCopy
         property string description: "Copy account"
-        sequence: StandardKey.Copy
+        sequence: [ StandardKey.Copy ]
         enabled: navigator.isInAuthenticator() && navigator.hasSelectedOathCredential()
         onActivated: navigator.oathCopySelectedCredential()
     }
@@ -305,7 +305,7 @@ ApplicationWindow {
     Shortcut {
         id: shortcutDelete
         property string description: "Delete account"
-        sequence: StandardKey.Delete
+        sequence: [ StandardKey.Delete ]
         enabled: navigator.isInAuthenticator() && navigator.hasSelectedOathCredential()
         onActivated: navigator.oathDeleteSelectedCredential()
     }
@@ -353,7 +353,7 @@ ApplicationWindow {
     Shortcut {
         id: shortcutClose
         property string description: "Close application window"
-        sequence: StandardKey.Close
+        sequence: [ StandardKey.Close ]
         onActivated: app.close()
         context: Qt.ApplicationShortcut
     }
@@ -361,7 +361,7 @@ ApplicationWindow {
     Shortcut {
         id: shortcutFullScreen
         property string description: "Toggle full screen"
-        sequence: StandardKey.FullScreen
+        sequence: [ StandardKey.FullScreen ]
         onActivated: visibility = visibility
                      === Window.FullScreen ? Window.Windowed : Window.FullScreen
         context: Qt.ApplicationShortcut

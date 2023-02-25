@@ -8,16 +8,16 @@ HEADERS += screenshot.h
 
 # This is the internal verson number, Windows requires 4 digits.
 win32|win64 {
-    VERSION = 5.1.0.0
+    VERSION = 5.2.0.0
     QMAKE_TARGET_COMPANY = Yubico
     QMAKE_TARGET_PRODUCT = Yubico Authenticator
     QMAKE_TARGET_DESCRIPTION = Yubico Authenticator
     QMAKE_TARGET_COPYRIGHT = Copyright (c) 2020 Yubico AB
 } else {
-    VERSION = 5.1.0
+    VERSION = 5.2.0
 }
 # This is the version shown on the About page
-DEFINES += APP_VERSION=\\\"5.1.0\\\"
+DEFINES += APP_VERSION=\\\"5.2.0\\\"
 
 message(Version of this build: $$VERSION)
 

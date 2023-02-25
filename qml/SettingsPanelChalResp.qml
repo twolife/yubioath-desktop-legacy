@@ -1,4 +1,4 @@
-import QtQuick 2.9
+import QtQuick 2.15
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.2
 import QtQuick.Controls.Material 2.2
@@ -63,9 +63,9 @@ ColumnLayout {
         })
     }
 
-    RegExpValidator {
+    RegularExpressionValidator {
         id: validator
-        regExp: /([0-9a-fA-F]{2}){1,20}$/
+        regularExpression: /([0-9a-fA-F]{2}){1,20}$/
     }
 
     function programChallengeResponse(slot) {

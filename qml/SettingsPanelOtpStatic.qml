@@ -1,4 +1,4 @@
-import QtQuick 2.9
+import QtQuick 2.15
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.2
 import QtQuick.Controls.Material 2.2
@@ -71,14 +71,14 @@ ColumnLayout {
         })
     }
 
-    RegExpValidator {
+    RegularExpressionValidator {
         id: modHexValidator
-        regExp: /[cbdefghijklnrtuvCBDEFGHIJKLMNRTUV]{1,38}$/
+        regularExpression: /[cbdefghijklnrtuvCBDEFGHIJKLMNRTUV]{1,38}$/
     }
 
-    RegExpValidator {
+    RegularExpressionValidator {
         id: usLayoutValidator
-        regExp: /[ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#\$%&'\\`\(\)\*\+,-\.\/:;<=>\?@\[\]\^_{}\|~]{1,38}$/
+        regularExpression: /[ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#\$%&'\\`\(\)\*\+,-\.\/:;<=>\?@\[\]\^_{}\|~]{1,38}$/
     }
 
     function programStaticPassword(slot) {

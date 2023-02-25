@@ -2,7 +2,6 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Material 2.2
-import QtGraphicalEffects 1.0
 import "utils.js" as Utils
 
 Flickable {
@@ -328,7 +327,7 @@ Flickable {
                 }
 
                 ToolButton {
-                    property bool isExpanded: false
+                    property bool isExpanded: true
                     id: expandButton
                     onClicked: isExpanded = !isExpanded
                     icon.width: 24
@@ -473,7 +472,7 @@ Flickable {
                 }
 
                 ToolButton {
-                    property bool isExpanded: false
+                    property bool isExpanded: true
                     id: expandButton2
                     onClicked: isExpanded = !isExpanded
                     icon.width: 24

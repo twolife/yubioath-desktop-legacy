@@ -26,7 +26,7 @@ Pane {
 
     signal activated(bool clicked)
 
-    background: Rectangle {
+    Rectangle {
         anchors.fill: parent
         color: item.isActive ? Material.accent : (item.hovered || isHovered ? defaultHovered : "transparent")
         radius: 4

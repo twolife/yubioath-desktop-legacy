@@ -2,7 +2,6 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.2
 import QtQuick.Controls.Material 2.2
-import QtGraphicalEffects 1.0
 
 ToolTip {
 
@@ -24,6 +23,7 @@ ToolTip {
         color: backgroundColor
         radius: 30
         layer.enabled: true
+/***
         layer.effect: DropShadow {
             radius: 2
             samples: radius * 2
@@ -32,6 +32,7 @@ ToolTip {
             color: formHighlightItem
             transparentBorder: true
         }
+***/
     }
 
     RowLayout {

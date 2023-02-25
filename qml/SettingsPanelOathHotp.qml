@@ -1,4 +1,4 @@
-import QtQuick 2.9
+import QtQuick 2.15
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.2
 import QtQuick.Controls.Material 2.2
@@ -23,9 +23,9 @@ ColumnLayout {
         }
     }
 
-    RegExpValidator {
+    RegularExpressionValidator {
         id: validator
-        regExp: /[ 2-7a-zA-Z]+=*/
+        regularExpression: /[ 2-7a-zA-Z]+=*/
     }
 
     function programOathHotp(slot) {

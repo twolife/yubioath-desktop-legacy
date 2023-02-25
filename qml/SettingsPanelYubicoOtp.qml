@@ -1,4 +1,4 @@
-import QtQuick 2.9
+import QtQuick 2.15
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.2
 import QtQuick.Controls.Material 2.2
@@ -50,8 +50,8 @@ ColumnLayout {
         StyledTextField {
             id: privateIdInput
             labelText: qsTr("Private ID")
-            validator: RegExpValidator {
-                regExp: /[0-9a-fA-F]{12}$/
+            validator: RegularExpressionValidator {
+                regularExpression: /[0-9a-fA-F]{12}$/
             }
         }
 
@@ -92,8 +92,8 @@ ColumnLayout {
         StyledTextField {
             id: secretKeyInput
             labelText: qsTr("Secret key")
-            validator: RegExpValidator {
-                regExp: /[0-9a-fA-F]{32}$/
+            validator: RegularExpressionValidator {
+                regularExpression: /[0-9a-fA-F]{32}$/
             }
         }
 
