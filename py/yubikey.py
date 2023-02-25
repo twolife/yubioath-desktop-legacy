@@ -20,9 +20,7 @@ from time import sleep
 
 from fido2.ctap import CtapError
 from fido2.ctap2 import Ctap2, ClientPin, FPBioEnrollment, CredentialManagement, CaptureError
-from ykman.device import scan_devices, list_all_devices, connect_to_device, get_name, read_info
 from ykman.pcsc import list_readers, list_devices as list_ccid
-from ykman.otp import PrepareUploadFailed, generate_static_pw, prepare_upload_key, time_challenge, format_oath_code
 from ykman.settings import AppData
 from ykman.oath import is_hidden, is_steam, calculate_steam
 from ykman.scancodes import KEYBOARD_LAYOUT, encode
@@ -43,6 +41,18 @@ from smartcard.Exceptions import NoCardException, CardConnectionException
 from ykman.scancodes import KEYBOARD_LAYOUT
 
 import pyotherside
+
+from ykman import __version__ as ykman_v
+
+if int(ykman_v.split(".")[0] ) > 4:
+    from yubikit.support import get_name, read_info
+    from ykman.device import list_all_devices, scan_devices
+    from ykman.otp import (
+    _PrepareUploadFailed as PrepareUploadFailed
+    , _prepare_upload_key as prepare_upload_key, generate_static_pw, time_challenge, format_oath_code)
+else:
+    from ykman.device import scan_devices, list_all_devices, get_name, read_info
+    from ykman.otp import PrepareUploadFailed, generate_static_pw, prepare_upload_key, time_challenge, format_oath_code
 
 
 logger = logging.getLogger(__name__)
@@ -193,7 +203,22 @@ class Controller(object):
                 return dev.open_connection(connection_types[0])
             else:
                 raise ValueError('no_device_custom_reader')
-        return connect_to_device(self._current_serial, connection_types=connection_types)[0]
+
+        if int(ykman_v.split(".")[0] ) > 4:
+            devs = list_all_devices(connection_types)
+            if len(devs) == 0:
+                raise Exception("No YubiKey connected")
+            elif len(devs) != 1:
+                raise Exception("More than one YubiKey connected")
+            dev, info2 = devs[0]
+
+            for conn_type in connection_types:
+                try:
+                    return dev.open_connection(conn_type)
+                except Exception:
+                    logger.debug(f"Failed connecting to the YubiKey over {conn_type}", exc_info=True)
+        else:
+            return connect_to_device(self._current_serial, connection_types=connection_types)[0]
 
     def _open_oath(self):
         if self._reader_filter:
@@ -203,7 +228,16 @@ class Controller(object):
             else:
                 raise ValueError('no_device_custom_reader')
 
-        return connect_to_device(self._current_serial, [SmartCardConnection])[0]
+        if int(ykman_v.split(".")[0] ) > 4:
+            devs = list_all_devices([SmartCardConnection])
+            if len(devs) == 0:
+                raise Exception("No YubiKey connected")
+            elif len(devs) != 1:
+                raise Exception("More than one YubiKey connected")
+            dev, info2 = devs[0]
+            return dev.open_connection(SmartCardConnection)
+        else:
+            return connect_to_device(self._current_serial, [SmartCardConnection])[0]
 
     def is_win_non_admin(self):
         return success({'winNonAdmin': self._win_non_admin})
@@ -284,7 +318,39 @@ class Controller(object):
         supported_interfaces = interfaces_from_capabilities(
                 info.supported_capabilities.get(TRANSPORT.USB))
 
-        return {
+        if int(ykman_v.split(".")[0] ) > 4:
+          return {
+            'name': get_name(info, dev.pid.yubikey_type),
+            'version': _get_version(info),
+            'serial': info.serial or '',
+            'usbAppEnabled': [
+                a.name for a in CAPABILITY
+                if a in info.config.enabled_capabilities.get(TRANSPORT.USB)],
+            'usbAppSupported': [
+                a.name for a in CAPABILITY
+                if a in info.supported_capabilities.get(TRANSPORT.USB)],
+            'nfcAppEnabled': [
+                a.name for a in CAPABILITY
+                if a in info.config.enabled_capabilities.get(TRANSPORT.NFC, [])],
+            'nfcAppSupported': [
+                a.name for a in CAPABILITY
+                if a in info.supported_capabilities.get(TRANSPORT.NFC, [])],
+            'usbInterfacesSupported': supported_interfaces,
+            'usbInterfacesEnabled': [
+                i.name for i in USB_INTERFACE
+                if i in dev.pid.usb_interfaces],
+            'canWriteConfig': info.version and info.version >= (5,0,0),
+            'configurationLocked': info.is_locked,
+            'formFactor': info.form_factor,
+            'hasPassword': dev.has_password if hasattr(dev, 'has_password') else False,
+            'ctapAvailable': ctap_available,
+            'fidoHasPin': fido_pin_list[0],
+            'fidoPinRetries': fido_pin_list[1],
+            'uvBlocked': fido_pin_list[2],
+            'isNfc': self._reader_filter and not self._reader_filter.lower().startswith("yubico yubikey"),
+          }
+        else:
+          return {
             'name': get_name(info, dev.pid.get_type()),
             'version': _get_version(info),
             'serial': info.serial or '',
@@ -313,7 +379,7 @@ class Controller(object):
             'fidoPinRetries': fido_pin_list[1],
             'uvBlocked': fido_pin_list[2],
             'isNfc': self._reader_filter and not self._reader_filter.lower().startswith("yubico yubikey"),
-       }
+          }
 
     def connect_custom_reader(self, reader_filter=None, otp_mode=False):
         def connect_custom_action(dev, event):
@@ -353,7 +419,11 @@ class Controller(object):
             dev = self._get_dev_from_reader()
             if dev:
                 with dev.open_connection(SmartCardConnection) as conn:
-                    info = read_info(dev.pid, conn)
+                    if int(ykman_v.split(".")[0] ) > 4:
+                        info = read_info(conn, dev.pid)
+                    else:
+                        info = read_info(dev.pid, conn)
+
                     try:
                         oath = OathSession(conn)
                         has_password = oath.locked
@@ -415,7 +485,12 @@ class Controller(object):
         win_fido = False
         no_access = sum(self._devs.values()) > len(self._devices)
         if no_access:
-            if self._win_non_admin and \
+          if int(ykman_v.split(".")[0] ) > 4:
+              if self._win_non_admin and \
+                    any(pid.usb_interfaces == USB_INTERFACE.FIDO for pid in self._devs.keys()):
+                win_fido = True
+          else:
+              if self._win_non_admin and \
                     any(pid.get_interfaces() == USB_INTERFACE.FIDO for pid in self._devs.keys()):
                 win_fido = True
 
@@ -1069,7 +1144,7 @@ class Controller(object):
                 while not event.is_set():
                     try:
                         logger.debug("Place your finger against the sensor now...")
-                        template_id = enroller.capture(event)
+                        template_id = enroller.capture(event=event)
                         if template_id:
                             pyotherside.send("bio_enroll", True, enroller.remaining, template_id.hex())
                             break
